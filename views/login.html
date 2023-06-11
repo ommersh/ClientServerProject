@@ -32,7 +32,7 @@
                     if (response.success) {
                         // Login successful
                         var successAlert = '<div class="alert alert-success">' + response.message + '</div>';
-                        $('#messageContainer').html(successAlert);
+                        $('#messageContainer').html("Logged in successfully");
                         window.location.href = '/'; // Redirect to home page
                     } else {
                         // Login failed
