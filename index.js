@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const session = require('express-session');
 
 // Set up session middleware
@@ -26,7 +26,7 @@ app.use(express.static(__dirname + '/views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const MONGODB_URI = 'mongodb+srv://ommersh:95pZE4gCkBqVBGiM@myfirstcluster.wnavi.mongodb.net/?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/?retryWrites=true&w=majority';
 
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
@@ -68,11 +68,11 @@ app.get('/login', (req, res) => {
     res.render('template', { data: data, loggedIn: req.session.loggedIn });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
     User.findOne({ username: req.body.username })
-    .then((user) => {
-      if (user) {
-          bcrypt.compare(req.body.password, user.password)
+        .then((user) => {
+            if (user) {
+                bcrypt.compare(req.body.password, user.password)
                     .then((result) => {
                         if (result) {
                             req.session.loggedIn = true;
@@ -105,22 +105,28 @@ app.get('/signup', (req, res) => {
     res.render('template', { data, loggedIn: req.session.loggedIn });
 });
 
-app.post('/signup', async (req, res) => {
-    try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+app.post('/signup', (req, res) => {
+    bcrypt.hash(req.body.password, 10)
+        .then((hashedPassword) => {
+            const newUser = new User({
+                username: req.body.username,
+                email: req.body.email,
+                password: hashedPassword,
+            });
 
-        const newUser = new User({
-            username: req.body.username,
-            email: req.body.email,
-            password: hashedPassword,          
+            newUser.save()
+                .then(() => {
+                    res.json({ success: true });
+                })
+                .catch((error) => {
+                    console.error('Error creating user:', error);
+                    res.json({ success: false, message: 'An error occurred during signup' });
+                });
+        })
+        .catch((error) => {
+            console.error('Error hashing password:', error);
+            res.json({ success: false, message: 'An error occurred during signup' });
         });
-
-        await newUser.save();
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Error creating user:', error);
-        res.json({ success: false, message: 'An error occurred during signup' });
-    }
 });
 
 // Logout route
