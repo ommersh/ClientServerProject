@@ -26,7 +26,7 @@ app.use(express.static(__dirname + '/views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const MONGODB_URI = 'mongodb+srv://ommersh:95pZE4gCkBqVBGiM@myfirstcluster.wnavi.mongodb.net/?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://stocks:Ct2YZGvvGKiniFjI@myfirstcluster.wnavi.mongodb.net/?retryWrites=true&w=majority';
 
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
