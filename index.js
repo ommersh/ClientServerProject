@@ -11,8 +11,8 @@ const session = require('express-session');
 // Set up session middleware
 app.use(session({
     secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: false
+    resave: true,
+    saveUninitialized: true
 }));
 
 app.set('view engine', 'ejs');
