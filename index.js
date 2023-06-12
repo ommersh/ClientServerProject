@@ -7,12 +7,25 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/mydatabase?retryWrites=true&w=majority';
 
-// Set up session middleware
+process.env.MONGODB_URI = MONGODB_URI;
+
+const store = new MongoDBStore({
+    uri: process.env.MONGODB_URI,
+    collection: 'sessions'
+});
+
+store.on('error', (error) => {
+    console.error('Session store error:', error);
+});
+
 app.use(session({
-    secret: 'your-secret-key',
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: store,
 }));
 
 app.set('view engine', 'ejs');
@@ -27,7 +40,7 @@ app.use(express.static(__dirname + '/particles.js-master'));
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/mydatabase?retryWrites=true&w=majority';
+
 
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
