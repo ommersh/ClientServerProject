@@ -8,10 +8,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 
+// Set up session middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: true,
-    saveUninitialized: true,
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false
 }));
 
 app.set('view engine', 'ejs');
