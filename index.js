@@ -7,13 +7,11 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
-const { MemoryStore } = require('express-session');
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    MemoryStore: MemoryStore
+    resave: true,
+    saveUninitialized: true,
 }));
 
 app.set('view engine', 'ejs');
