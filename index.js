@@ -9,7 +9,6 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/mydatabase?retryWrites=true&w=majority';
-
 process.env.MONGODB_URI = MONGODB_URI;
 
 const store = new MongoDBStore({
