@@ -1,0 +1,65 @@
+﻿<h1><i class="fas fa-user-plus"></i>contact us</h1>
+<br>
+<form  id="contactUsForm" action="/contactUs" method="POST">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="off" required>
+    <br><br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="off" required>
+    <br><br>
+    <select class="form-select" name="subject" id="subject">
+        <option value="" selected>Select </option>
+        <option value="complaints">Complaints </option>
+        <option value="questions">Questions </option>
+        <option value="support">Technical Support </option>
+    </select>
+    <br><br>
+    <div class="form-group">
+        <textarea class="form-control" id="text" rows="10" name="message" placeholder="Your message"></textarea>
+
+    </div>
+    <button type="submit">send</button>
+</form>
+
+<div id="messageContainer" class="mt-3"></div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#contactUsForm').submit(function (event) {
+            event.preventDefault(); // Prevent form submission
+            var username = $('#username').val();
+            var email = $('#email').val();
+            var subject = $('#subject').val();
+            var text = $('#text').val();
+
+            // Make Ajax request
+            $.ajax({
+                type: 'POST',
+                url: '/contactUs',
+                data: {
+                    username: username,
+                    email: email,
+                    subject: subject,
+                    text: text,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // contect us successful
+                        var successAlert = '<div class="alert alert-success">' + response.message + '</div>';
+                        $('#messageContainer').html(successAlert);
+                        $('#contactUsForm')[0].reset(); // Clear form fields
+                    } else {
+                        // contect us failed
+                        var errorAlert = '<div class="alert alert-danger">' + response.message + '</div>';
+                        $('#messageContainer').html(errorAlert);
+                    }
+                },
+                error: function (error) {
+                    console.error('An error occurred during the Ajax request:', error);
+                    var errorAlert = '<div class="alert alert-danger">An error occurred during contac tUs</div>';
+                    $('#messageContainer').html(errorAlert);
+                }
+            });
+        });
+    });
+</script>
