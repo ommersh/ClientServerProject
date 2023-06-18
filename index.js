@@ -6,7 +6,9 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 const session = require('express-session');
+const axios = require('axios');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/mydatabase?retryWrites=true&w=majority';
 process.env.MONGODB_URI = MONGODB_URI;
@@ -39,7 +41,25 @@ app.use(express.static(__dirname + '/particles.js-master'));
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    port: 465,
 
+    auth: {
+        user: 'forProjectSummer23@gmail.com',
+        pass: 'skzmiycrrvybffqw'
+    }
+});
+const axioss = require("axios").default;
+
+const options = {
+    method: 'GET',
+    url: 'https://latest-stock-price.p.rapidapi.com/any',
+    headers: {
+        'X-RapidAPI-Key': 'b973772188mshbf4a6f8d1c5e6c3p1ce724jsne9928b591899',
+        'X-RapidAPI-Host': 'latest-stock-price.p.rapidapi.com'
+    }
+};
 
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
@@ -140,6 +160,103 @@ app.post('/signup', (req, res) => {
             console.error('Error hashing password:', error);
             res.json({ success: false, message: 'An error occurred during signup' });
         });
+});
+
+app.get('/contactUs', (req, res) => {
+    const contactUsContent = fs.readFileSync(path.join(__dirname, 'views', 'contactUs.html'), 'utf8');
+
+    const data = {
+        pageTitle: 'Contact Us Page',
+        bodyPageContent: contactUsContent,
+    };
+    res.render('template', { data, loggedIn: req.session.loggedIn });
+});
+
+app.post('/contactUs', (req, res) => {
+
+    let name = req.body.username;
+    let email = req.body.email;
+    let subject = req.body.subject;
+    let message = req.body.text;
+
+    let mailOptions1 = {
+        from: 'forProjectSummer23@gmail.com',
+        to: 'forProjectSummer23@gmail.com',
+        subject: 'Mail from ' + name + ' about ' + subject,
+        text: message + ' return email ' + email
+    };
+    let mailOptions2 = {
+        from: 'forProjectSummer23@gmail.com',
+        to: email,
+        subject: 'your message has been recived',
+        text: 'your message has been recived, we will contect you soon'
+    };
+
+    transporter.sendMail(mailOptions1, function (error, info) {
+        if (error) {
+            console.log(error);
+            res.json({ success: false, message: 'An error occurred while sending the email' });
+        } else {
+            console.log('Email sent: ' + info.response);
+            transporter.sendMail(mailOptions2, function (error, info) {
+                if (error) {
+                    console.log(error);
+                    res.json({ success: false, message: 'An error occurred while sending the email' });
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    res.json({ success: true, message: 'Emails sent successfully' });
+                }
+            });
+        }
+    });
+});
+//stocks
+app.get('/stocks', (req, res) => {
+    const stocksContent = fs.readFileSync(path.join(__dirname, 'views', 'stocks.html'), 'utf8');
+
+    const data = {
+        pageTitle: 'Stocks',
+        bodyPageContent: stocksContent,
+    };
+    res.render('template', { data, loggedIn: req.session.loggedIn });
+});
+
+app.post('/stocks', (req, res) => {
+
+    let itemSelectedFromDropdown = req.body.stockSelected;
+    let itemFromsearch = req.body.stockSearchInput;
+
+    axioss.request(options).then(function (response) {
+
+        let dataFromResponse = response.data;
+        for (var i = 0; i < dataFromResponse.length; i++) {
+            if (dataFromResponse[i].symbol == itemSelectedFromDropdown) {
+
+                let dataOfStock = dataFromResponse[i];
+                res.send("<html><body> <h1><strong> " + dataOfStock.symbol + "</strong></h1>" +
+                    "<h1> Open: " + dataOfStock.open + "</h1>" +
+                    "<h1> Day High: " + dataOfStock.dayHigh + "</h1>" +
+                    "<h1> Day Low: " + dataOfStock.dayLow + "</h1>" +
+                    "<h1> Last Price: " + dataOfStock.lastPrice + "</h1>" +
+                    "<h1> Previous Close: " + dataOfStock.previousClose + "</h1>" +
+                    "<h1> Year Low: " + dataOfStock.yearHigh + "</h1>" +
+                    "<h1> Year Low: " + dataOfStock.yearLow + "</h1>" +
+                    "<h1> Last Update Time: " + dataOfStock.lastUpdateTime + "</h1>" +
+                    "</body></html>")
+
+
+                /*  app.get('/presentStock', (req, res) => {
+                      // Render the stock.html file with the stock data
+                     // res.render('presentStock.html', { dataOfStock, loggedIn: req.session.loggedIn }); // Using res.render() with a template engine like EJS or Handlebars
+                      // or C:\Users\STAV\Documents\clientServer\clienSreverLabProj\ClientServerProject-main\ClientServerProject-main\views\presentStock.html
+                      res.sendFile(__dirname + '\views\presentStock.html'); // Using res.sendFile()
+                  });*/
+            }
+        }
+
+    }).catch(function (error) {
+        console.error(error)
+    });
 });
 
 // Logout route
