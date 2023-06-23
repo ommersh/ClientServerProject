@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Data</title>
+</head>
+<body>
+    <h1><strong><%= itemFromsearch %></strong></h1>
+    <h1>Last Price: <%= dataFromResponse1.price %></h1>
+    <h1>Name: <%= dataFromResponse2.name %></h1>
+	<h1>Currency: <%= dataFromResponse2.currency %></h1>
+	<h1>Date: <%= dataFromResponse2.datetime %></h1>
+	<h1>Open: <%= dataFromResponse2.open %></h1>
+	<h1>Close: <%= dataFromResponse2.close %></h1>
+	<h1>High: <%= dataFromResponse2.high %></h1>
+	<h1>Low: <%= dataFromResponse2.low %></h1>
+	<h1>Previous Close: <%= dataFromResponse2.previous_close %></h1>
+	<h1>Percent Change: <%= dataFromResponse2.percent_change %></h1>
+   <div>
+        <label for="intervalSelect">Select Interval:</label>
+        <select id="intervalSelect">
+            <option value="1day">1 Day</option>
+            <option value="1week">1 Week</option>
+            <option value="1month">1 Month</option>
+        </select>
+    </div>
+
+    <canvas id="stockChart"></canvas>
+
+    <script>
+        const labels = <%= JSON.stringify(dataFromResponse4.values.datetime) %>;
+        const values = <%= JSON.stringify(dataFromResponse4.values.map(entry => entry.close)) %>;
+
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        let chart = null;
+
+        function updateChart(interval) {
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Stock Changes',
+                            data: values,
+                            fill: false,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const intervalSelect = document.getElementById('intervalSelect');
+        intervalSelect.addEventListener('change', function() {
+            const selectedInterval = intervalSelect.value;
+            // Call a function to update the chart with the selected interval
+            updateChart(selectedInterval);
+        });
+
+        // Initial chart creation
+        updateChart('1day');
+    </script>
+</body>
+</html>

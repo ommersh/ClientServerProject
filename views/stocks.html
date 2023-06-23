@@ -10,34 +10,12 @@
 <br>
 <h2>Select the Stock</h2>
 
-<form id="stocksForm" class="" action="/stocks" method="post">
-    <input type="text" id="stockSearchInput" placeholder="Enter stock symbol" />
+<form id="stocksForm" action="/stocks" method="POST">
+    <input type="text" id="stockSearchInput" name="stockSearchInput" placeholder="Enter stock symbol" autocomplete="off" required>
     <button type="submit">Search</button>
-    <select class="" name="stockSelected">
-        <option value="RELIANCE">
-            RELIANCE
-        </option>
-        <option value="INFY">
-            INFOSYS
-        </option>
-        <option value="TCS">
-            TCS
-        </option>
-        <option value="WIPRO">
-            WIPRO
-        </option>
-        <option value="ICICIBANK">
-            ICICI Bank
-        </option>
-        <option value="ITC">
-            ITC
-        </option>
-    </select>
-    <button type="submit"
-            name="button">
-        Fetch Data
-    </button>
 </form>
 <div id="stockDataContainer" class="mt-3">
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+
