@@ -18,4 +18,37 @@
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 
+<script>
+    $(document).ready(function () {
+        $('#stocksForm').submit(function (event) {
+            var stockSearchInput = $('#stockSearchInput').val();
+            // Make Ajax request
+            $.ajax({
+                type: 'POST',
+                url: '/stocks',
+                data: {
+                    stockSearchInput: stockSearchInput,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // contect us successful
+                        var successAlert = '<div class="alert alert-success">' + response.message + '</div>';
+                        $('#stockDataContainer').html(successAlert);
+                        window.location.href = '/presentStock'; // Redirect to home page
+                    } else {
+                        // contect us failed
+                        var errorAlert = '<div class="alert alert-danger">' + response.message + '</div>';
+                        $('#stockDataContainer').html(errorAlert);
+                    }
+                },
+                error: function (error) {
+                    console.error('An error occurred during the Ajax request:', error);
+                    var errorAlert = '<div class="alert alert-danger">An error occurred during contac tUs</div>';
+                    $('#stockDataContainer').html(errorAlert);
+                }
+            });
+        });
+    });
+</script>
+
 

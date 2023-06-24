@@ -2,10 +2,10 @@
 <br>
 <form  id="contactUsForm" action="/contactUs" method="POST">
     <label for="username">Username:</label>
-    <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="off" required>
+    <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="off" value="<%= username %>" required>
     <br><br>
     <label for="email">Email:</label>
-    <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="off" required>
+    <input type="email" id="email" name="email" placeholder="Enter your email"  autocomplete="off" value="<%= email %>" required>
     <br><br>
     <select class="form-select" name="subject" id="subject">
         <option value="" selected>Select </option>
@@ -25,6 +25,13 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script>
     $(document).ready(function () {
+        if (loggedIn) {
+           // $('#username').val(data.username);
+           // $('#email').val(data.email);
+
+            document.getElementById("username").value = username;
+            document.getElementById("email").value = email;
+        }
         $('#contactUsForm').submit(function (event) {
             event.preventDefault(); // Prevent form submission
             var username = $('#username').val();

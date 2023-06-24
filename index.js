@@ -170,6 +170,9 @@ app.get('/contactUs', (req, res) => {
     const data = {
         pageTitle: 'Contact Us Page',
         bodyPageContent: contactUsContent,
+        loggedIn: req.session.loggedIn,
+        username: req.session.loggedIn ? req.session.loggedIn.username : '',
+        email: req.session.loggedIn ? req.session.loggedIn.email : ''
     };
     res.render('template', { data, loggedIn: req.session.loggedIn });
 });
