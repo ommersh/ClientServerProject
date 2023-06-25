@@ -161,5 +161,7 @@
   "bugs": {
     "url": "https://github.com/ommersh/ClientServerProject/issues"
   },
-  "homepage": "https://github.com/ommersh/ClientServerProject#readme"
+  "homepage": "https://github.com/ommersh/ClientServerProject#readme",
+  "devDependencies": {},
+  "keywords": []
 }

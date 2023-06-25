@@ -194,7 +194,7 @@ app.post('/contactUs', (req, res) => {
         from: 'forProjectSummer23@gmail.com',
         to: email,
         subject: 'your message has been recived',
-        text: 'your message has been recived, we will contect you soon'
+        text: 'your message has been recived, we will contact you soon'
     };
 
     transporter.sendMail(mailOptions1, function (error, info) {
