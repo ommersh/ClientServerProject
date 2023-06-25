@@ -12,6 +12,7 @@ const axios = require('axios');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/mydatabase?retryWrites=true&w=majority';
 process.env.MONGODB_URI = MONGODB_URI;
+const twelvedata = require("twelvedata");
 
 const store = new MongoDBStore({
     uri: process.env.MONGODB_URI,
@@ -50,16 +51,10 @@ var transporter = nodemailer.createTransport({
         pass: 'skzmiycrrvybffqw'
     }
 });
-const axioss = require("axios").default;
 
-const options = {
-    method: 'GET',
-    url: 'https://latest-stock-price.p.rapidapi.com/any',
-    headers: {
-        'X-RapidAPI-Key': 'b973772188mshbf4a6f8d1c5e6c3p1ce724jsne9928b591899',
-        'X-RapidAPI-Host': 'latest-stock-price.p.rapidapi.com'
-    }
-};
+
+
+let keyForStock = "9c512d2eb06b44cd8e670a44ce3107d4";
 
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
@@ -221,44 +216,64 @@ app.get('/stocks', (req, res) => {
     res.render('template', { data, loggedIn: req.session.loggedIn });
 });
 
+
 app.post('/stocks', (req, res) => {
 
-    let itemSelectedFromDropdown = req.body.stockSelected;
     let itemFromsearch = req.body.stockSearchInput;
+    var url1 = 'https://api.twelvedata.com/price?symbol=' + itemFromsearch + '&apikey=' + keyForStock;
+    var url2 = 'https://api.twelvedata.com/quote?symbol=' + itemFromsearch + '&apikey=' + keyForStock;
+    var url3 = 'https://api.twelvedata.com/market_movers/stocks?outputsize=20&apikey=' + keyForStock;
+    var url4 = 'https://api.twelvedata.com/time_series?symbol=' + itemFromsearch + '&interval=1day&apikey=' + keyForStock;
+    request.get({
+        url: url1,
+        json: true,
+        headers: { 'User-Agent': 'request' }
+    }, (err, response, data1) => {
+        if (err) {
+            console.log('Error:', err);
+        } else if (response.statusCode !== 200) {
+            console.log('Status:', response.statusCode);
+        } else {
+            // data1 is successfully parsed as a JSON object
+            // Make the second request
+            request.get({
+                url: url2,
+                json: true,
+                headers: { 'User-Agent': 'request' }
+            }, (err, response, data2) => {
+                if (err) {
+                    console.log('Error:', err);
+                } else if (response.statusCode !== 200) {
+                    console.log('Status:', response.statusCode);
+                } else {
+                    request.get({
+                        url: url4,
+                        json: true,
+                        headers: { 'User-Agent': 'request' }
+                    }, (err, response4, dataFromResponse4) => {
+                        if (err) {
+                            console.log('Error:', err);
+                            res.render('error', { message: 'Error fetching data.' });
+                        } else if (response4.statusCode !== 200) {
+                            console.log('Status:', response4.statusCode);
+                            res.render('error', { message: 'Error fetching data.' });
+                        } else {
+                            // dataFromResponse1 and dataFromResponse2 and dataFromResponse4 are successfully fetched
+                            // Pass the data to the template for rendering
+                            res.render('presentStock', {
+                                itemFromsearch: itemFromsearch,
+                                dataFromResponse1: data1,
+                                dataFromResponse2: data2,
+                                dataFromResponse4: dataFromResponse4
+                            });
+                        }
+                    });
 
-    axioss.request(options).then(function (response) {
-
-        let dataFromResponse = response.data;
-        for (var i = 0; i < dataFromResponse.length; i++) {
-            if (dataFromResponse[i].symbol == itemSelectedFromDropdown) {
-
-                let dataOfStock = dataFromResponse[i];
-                res.send("<html><body> <h1><strong> " + dataOfStock.symbol + "</strong></h1>" +
-                    "<h1> Open: " + dataOfStock.open + "</h1>" +
-                    "<h1> Day High: " + dataOfStock.dayHigh + "</h1>" +
-                    "<h1> Day Low: " + dataOfStock.dayLow + "</h1>" +
-                    "<h1> Last Price: " + dataOfStock.lastPrice + "</h1>" +
-                    "<h1> Previous Close: " + dataOfStock.previousClose + "</h1>" +
-                    "<h1> Year Low: " + dataOfStock.yearHigh + "</h1>" +
-                    "<h1> Year Low: " + dataOfStock.yearLow + "</h1>" +
-                    "<h1> Last Update Time: " + dataOfStock.lastUpdateTime + "</h1>" +
-                    "</body></html>")
-
-
-                /*  app.get('/presentStock', (req, res) => {
-                      // Render the stock.html file with the stock data
-                     // res.render('presentStock.html', { dataOfStock, loggedIn: req.session.loggedIn }); // Using res.render() with a template engine like EJS or Handlebars
-                      // or C:\Users\STAV\Documents\clientServer\clienSreverLabProj\ClientServerProject-main\ClientServerProject-main\views\presentStock.html
-                      res.sendFile(__dirname + '\views\presentStock.html'); // Using res.sendFile()
-                  });*/
-            }
+                }
+            });
         }
-
-    }).catch(function (error) {
-        console.error(error)
     });
 });
-
 // Logout route
 app.get('/logout', (req, res) => {
     req.session.loggedIn = false;
