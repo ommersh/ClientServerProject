@@ -80,7 +80,13 @@ const userSchema = new mongoose.Schema({
     email: String
 });
 
+const stockSchema = new mongoose.Schema({
+    username: String,
+    
+});
+
 const User = mongoose.model('User', userSchema);
+const Stock = mongoose.model('Stock', stockSchema);
 
 app.get('/', (req, res) => {
     const bodyPageContent = fs.readFileSync(path.join(__dirname, 'views', 'home.html'), 'utf8');
