@@ -218,12 +218,12 @@ app.get('/stocks', (req, res) => {
 
 
 app.post('/stocks', (req, res) => {
-
     let itemFromsearch = req.body.stockSearchInput;
     var url1 = 'https://api.twelvedata.com/price?symbol=' + itemFromsearch + '&apikey=' + keyForStock;
     var url2 = 'https://api.twelvedata.com/quote?symbol=' + itemFromsearch + '&apikey=' + keyForStock;
     var url3 = 'https://api.twelvedata.com/market_movers/stocks?outputsize=20&apikey=' + keyForStock;
     var url4 = 'https://api.twelvedata.com/time_series?symbol=' + itemFromsearch + '&interval=1day&apikey=' + keyForStock;
+
     request.get({
         url: url1,
         json: true,
@@ -231,11 +231,11 @@ app.post('/stocks', (req, res) => {
     }, (err, response, data1) => {
         if (err) {
             console.log('Error:', err);
+            res.status(500).json({ success: false, message: 'Error fetching data.' });
         } else if (response.statusCode !== 200) {
             console.log('Status:', response.statusCode);
+            res.status(500).json({ success: false, message: 'Error fetching data.' });
         } else {
-            // data1 is successfully parsed as a JSON object
-            // Make the second request
             request.get({
                 url: url2,
                 json: true,
@@ -243,8 +243,10 @@ app.post('/stocks', (req, res) => {
             }, (err, response, data2) => {
                 if (err) {
                     console.log('Error:', err);
+                    res.status(500).json({ success: false, message: 'Error fetching data.' });
                 } else if (response.statusCode !== 200) {
                     console.log('Status:', response.statusCode);
+                    res.status(500).json({ success: false, message: 'Error fetching data.' });
                 } else {
                     request.get({
                         url: url4,
@@ -253,14 +255,13 @@ app.post('/stocks', (req, res) => {
                     }, (err, response4, dataFromResponse4) => {
                         if (err) {
                             console.log('Error:', err);
-                            res.render('error', { message: 'Error fetching data.' });
+                            res.status(500).json({ success: false, message: 'Error fetching data.' });
                         } else if (response4.statusCode !== 200) {
                             console.log('Status:', response4.statusCode);
-                            res.render('error', { message: 'Error fetching data.' });
+                            res.status(500).json({ success: false, message: 'Error fetching data.' });
                         } else {
-                            // dataFromResponse1 and dataFromResponse2 and dataFromResponse4 are successfully fetched
-                            // Pass the data to the template for rendering
-                            res.render('presentStock', {
+                            res.status(200).json({
+                                success: true,
                                 itemFromsearch: itemFromsearch,
                                 dataFromResponse1: data1,
                                 dataFromResponse2: data2,
@@ -268,12 +269,12 @@ app.post('/stocks', (req, res) => {
                             });
                         }
                     });
-
                 }
             });
         }
     });
 });
+
 // Logout route
 app.get('/logout', (req, res) => {
     req.session.loggedIn = false;
@@ -281,5 +282,5 @@ app.get('/logout', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running on http://localhost:${port}`); 
 });
