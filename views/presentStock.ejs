@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Data</title>
+	 <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap.min.js">
+    <link rel="stylesheet" type="text/css" href="style.css?version=2" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+	<style>
+    .scrollable-page {
+      height: 100vh;
+      overflow-y: auto;
+    }
+	.transition-background {
+		transition: background-color 0.5s ease;
+	}
+  </style>
+</head>
+<body class="container-fluid scrollable-page transition-background">
+    <h1><strong><%= itemFromsearch %></strong></h1>
+    <h1>Last Price: <%= dataFromResponse1.price %></h1>
+    <h1>Name: <%= dataFromResponse2.name %></h1>
+	<h1>Currency: <%= dataFromResponse2.currency %></h1>
+	<h1>Date: <%= dataFromResponse2.datetime %></h1>
+	<h1>Open: <%= dataFromResponse2.open %></h1>
+	<h1>Close: <%= dataFromResponse2.close %></h1>
+	<h1>High: <%= dataFromResponse2.high %></h1>
+	<h1>Low: <%= dataFromResponse2.low %></h1>
+	<h1>Previous Close: <%= dataFromResponse2.previous_close %></h1>
+	<h1>Percent Change: <%= dataFromResponse2.percent_change %></h1>
+	<button type="submit">Add to Favourites</button>
+   <div>
+        <label for="intervalSelect">Select Interval:</label>
+        <select id="intervalSelect">
+            <option value="1day">1 Day</option>
+            <option value="1week">1 Week</option>
+            <option value="1month">1 Month</option>
+        </select>
+    </div>
+
+	<div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <canvas width = "100px" hight = "80px" id="stockChart"></canvas>
+	</div>
+
+    <script>
+        const labels = <%= JSON.stringify(dataFromResponse4.values) %>;
+        const values = <%= JSON.stringify(dataFromResponse4.values) %>;
+
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        let chart = null;
+
+        function updateChart(interval) {
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Stock Changes',
+                            data: values,
+                            fill: false,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const intervalSelect = document.getElementById('intervalSelect');
+        intervalSelect.addEventListener('change', function() {
+            const selectedInterval = intervalSelect.value;
+            // Call a function to update the chart with the selected interval
+            updateChart(selectedInterval);
+        });
+
+        // Initial chart creation
+        updateChart('1day');
+    </script>
+</body>
+</html>
