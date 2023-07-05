@@ -153,6 +153,20 @@ app.post('/signup', async  (req, res) => {
 
             newUser.save()
                 .then(() => {
+                    const mailOptions = {
+                        from: 'forProjectSummer23@gmail.com',
+                        to: req.body.email,
+                        subject: 'Welcome!',
+                        text: 'Thank you for signing up!'
+                    };
+
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            console.error('Error sending email:', error);
+                        } else {
+                            console.log('Email sent successfully:', info.response);
+                        }
+                    });
                     res.json({ success: true });
                 })
                 .catch((error) => {

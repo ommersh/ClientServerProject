@@ -39,9 +39,10 @@
                 success: function (response) {
                     if (response.success) {
                         // Signup successful
-                        var successAlert = '<div class="alert alert-success"> Signed up successfully'</div>';
+                        var successAlert = '<div class="alert alert-success"> Signed up successfully</div>';
                         $('#messageContainer').html(successAlert);
                         $('#signupForm')[0].reset(); // Clear form fields
+                        window.location.href = '/'; // Redirect to home page
                     } else {
                         // Signup failed
                         var errorAlert = '<div class="alert alert-danger">' + response.message + '</div>';
