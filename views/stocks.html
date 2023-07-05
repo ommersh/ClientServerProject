@@ -1,66 +1,92 @@
 ﻿<head>
-    <meta charset="utf-8">
-    <style media="screen">
-        body {
-            text-align: center !important;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Stock Page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 </head>
-<h1>Fetch the Data Related to Any Stock</h1>
-<br>
-<h2>Select the Stock</h2>
+<body>
+    <h1><i class="fas fa-chart-line"></i> Stock Page</h1>
+    <form id="stockForm" action="/stocks" method="POST">
+        <label for="stockSearchInput">Stock Symbol:</label>
+        <input type="text" id="stockSearchInput" name="stockSearchInput" placeholder="Enter stock symbol" required>
+        <br>
+        <label for="timeIntervalSelect">Time Interval:</label>
+        <select id="timeIntervalSelect" name="timeIntervalSelect">
+            <option value="1h">Hourly</option>
+            <option value="1day">Daily</option>
+            <option value="1week">Weekly</option>
+            <option value="1month">Monthly</option>
+        </select>
+        <br>
+        <button type="submit">Search</button>
+    </form>
+    <div id="graphContainer">
+        <label id="messageContainer" for=""></label>
+        <canvas id="stockChart"></canvas>
+    </div>
 
-<form id="stocksForm" action="/stocks" method="POST">
-    <input type="text" id="stockSearchInput" name="stockSearchInput" placeholder="Enter stock symbol" autocomplete="off" required>
-    <button type="submit">Search</button>
-</form>
-<div id="stockDataContainer" class="mt-3">
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var chartElement = document.getElementById('stockChart').getContext('2d');
+            var stockChart = null;
 
-<script>
-  $(document).ready(function () {
-    $('#stocksForm').submit(function (event) {
-      event.preventDefault(); // Prevent form submission
+            $('#stockForm').submit(function (event) {
+                event.preventDefault(); // Prevent form submission
+                var stockSymbol = $('#stockSearchInput').val();
+                var timeInterval = $('#timeIntervalSelect').val();
 
-      var stockSearchInput = $('#stockSearchInput').val();
-      // Make Ajax request
-      $.ajax({
-        type: 'POST',
-        url: '/stocks',
-        data: {
-          stockSearchInput: stockSearchInput,
-        },
-        success: function (response) {
-          if (response.success) {
-            // Display the received stock data
-            var stockDataHtml = `
-              <h1><strong>${response.itemFromsearch}</strong></h1>
-              <h1>Last Price: ${response.dataFromResponse1.price}</h1>
-              <h1>Name: ${response.dataFromResponse2.name}</h1>
-              <h1>Currency: ${response.dataFromResponse2.currency}</h1>
-              <h1>Date: ${response.dataFromResponse2.datetime}</h1>
-              <h1>Open: ${response.dataFromResponse2.open}</h1>
-              <h1>Close: ${response.dataFromResponse2.close}</h1>
-              <h1>High: ${response.dataFromResponse2.high}</h1>
-              <h1>Low: ${response.dataFromResponse2.low}</h1>
-              <h1>Previous Close: ${response.dataFromResponse2.previous_close}</h1>
-              <h1>Percent Change: ${response.dataFromResponse2.percent_change}</h1>
-              <button type="submit">Add to Favorites</button>
-            `;
-            $('#stockDataContainer').html(stockDataHtml);
-          } else {
-            // Display an error message
-            var errorAlert = '<div class="alert alert-danger">' + response.message + '</div>';
-            $('#stockDataContainer').html(errorAlert);
-          }
-        },
-        error: function (error) {
-          console.error('An error occurred during the Ajax request:', error);
-          var errorAlert = '<div class="alert alert-danger">An error occurred during contac tUs</div>';
-          $('#stockDataContainer').html(errorAlert);
-        }
-      });
-    });
-  });
-</script>
+                // Make Ajax request
+                $.ajax({
+                    type: 'POST',
+                    url: '/stocks',
+                    data: {
+                        stockSearchInput: stockSymbol,
+                        timeIntervalSelect: timeInterval,
+                    },
+                    success: function (response) {
+                        if (response.status === 'ok') {
+
+                            var companyName = response.meta.symbol;
+                            $('#messageContainer').html('Stock graph of: ' + companyName);
+
+                            var stockData = response.values;
+                            var dates = stockData.map(item => item.datetime).reverse();
+                            var prices = stockData.map(item => parseFloat(item.close)).reverse();
+                            renderGraph(stockChart, dates, prices);
+                        } else {
+                            // Display an error message
+                            var errorAlert = '<div class="alert alert-danger">symbol ' + stockSymbol + ' not found.</div>';
+                            $('#messageContainer').html(errorAlert);
+                        }
+                    },
+                    error: function (error) {
+                        var errorAlert = '<div class="alert alert-danger">' + response.message + '</div>';
+                        $('#messageContainer').html(errorAlert);
+                    }
+                });
+            });
+
+            function renderGraph(chart, dates, closePrices) {
+                if (chart === null) {
+                    chart = new Chart(chartElement, {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [{
+                                label: 'Stock Prices',
+                                data: closePrices,
+                                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                                borderColor: 'rgba(5, 123, 255, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                    });
+                } else {
+                    chart.data.labels = dates;
+                    chart.data.datasets[0].data = closePrices;
+                    chart.update();
+                }
+            }
+        });
+    </script>
+</body>
