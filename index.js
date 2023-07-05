@@ -96,7 +96,7 @@ app.get('/login', (req, res) => {
     res.render('template', { data: data, loggedIn: req.session.loggedIn });
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async  (req, res) => {
     User.findOne({ username: req.body.username })
         .then((user) => {
             if (user) {
@@ -133,7 +133,7 @@ app.get('/signup', (req, res) => {
     res.render('template', { data, loggedIn: req.session.loggedIn });
 });
 
-app.post('/signup', (req, res) => {
+app.post('/signup', async  (req, res) => {
     bcrypt.hash(req.body.password, 10)
         .then((hashedPassword) => {
             const newUser = new User({
@@ -167,7 +167,7 @@ app.get('/contactUs', (req, res) => {
     res.render('template', { data, loggedIn: req.session.loggedIn });
 });
 
-app.post('/contactUs', (req, res) => {
+app.post('/contactUs', async  (req, res) => {
 
     let name = req.body.username;
     let email = req.body.email;
@@ -217,63 +217,22 @@ app.get('/stocks', (req, res) => {
 });
 
 
-app.post('/stocks', (req, res) => {
-    let itemFromsearch = req.body.stockSearchInput;
-    var url1 = 'https://api.twelvedata.com/price?symbol=' + itemFromsearch + '&apikey=' + keyForStock;
-    var url2 = 'https://api.twelvedata.com/quote?symbol=' + itemFromsearch + '&apikey=' + keyForStock;
-    var url3 = 'https://api.twelvedata.com/market_movers/stocks?outputsize=20&apikey=' + keyForStock;
-    var url4 = 'https://api.twelvedata.com/time_series?symbol=' + itemFromsearch + '&interval=1day&apikey=' + keyForStock;
+app.post('/stocks', async  (req, res) => {
+    const { stockSearchInput, timeIntervalSelect } = req.body;
+    const url = `https://api.twelvedata.com/time_series?symbol=${stockSearchInput}&interval=${timeIntervalSelect}&apikey=${keyForStock}`;
 
-    request.get({
-        url: url1,
-        json: true,
-        headers: { 'User-Agent': 'request' }
-    }, (err, response, data1) => {
-        if (err) {
-            console.log('Error:', err);
-            res.status(500).json({ success: false, message: 'Error fetching data.' });
-        } else if (response.statusCode !== 200) {
-            console.log('Status:', response.statusCode);
-            res.status(500).json({ success: false, message: 'Error fetching data.' });
-        } else {
-            request.get({
-                url: url2,
-                json: true,
-                headers: { 'User-Agent': 'request' }
-            }, (err, response, data2) => {
-                if (err) {
-                    console.log('Error:', err);
-                    res.status(500).json({ success: false, message: 'Error fetching data.' });
-                } else if (response.statusCode !== 200) {
-                    console.log('Status:', response.statusCode);
-                    res.status(500).json({ success: false, message: 'Error fetching data.' });
-                } else {
-                    request.get({
-                        url: url4,
-                        json: true,
-                        headers: { 'User-Agent': 'request' }
-                    }, (err, response4, dataFromResponse4) => {
-                        if (err) {
-                            console.log('Error:', err);
-                            res.status(500).json({ success: false, message: 'Error fetching data.' });
-                        } else if (response4.statusCode !== 200) {
-                            console.log('Status:', response4.statusCode);
-                            res.status(500).json({ success: false, message: 'Error fetching data.' });
-                        } else {
-                            res.status(200).json({
-                                success: true,
-                                itemFromsearch: itemFromsearch,
-                                dataFromResponse1: data1,
-                                dataFromResponse2: data2,
-                                dataFromResponse4: dataFromResponse4
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
-});
+    // Make API request to fetch stock data based on stock symbol and time interval
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // Process the stock data as needed and send it back to the client
+            res.json(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).json({ error: 'An error occurred' });
+        });
+}); 
 
 // Logout route
 app.get('/logout', (req, res) => {
