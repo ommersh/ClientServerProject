@@ -8,6 +8,12 @@
     <label for="password"><i class="fas fa-lock"></i> Password:</label>
     <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="new-password" required>
     <br>
+    <div>
+        <label>
+            <input type="checkbox" id="rememberMe" name="rememberMe">
+            Remember Me
+        </label>
+    </div>
     <button type="submit">Login</button>
 </form>
 
@@ -23,6 +29,7 @@
             event.preventDefault(); // Prevent form submission
             var username = $('#username').val();
             var password = $('#password').val();
+            var rememberMe = $('#rememberMe').is(':checked');
 
             // Make Ajax request
             $.ajax({
@@ -30,7 +37,8 @@
                 url: '/login',
                 data: {
                     username: username,
-                    password: password
+                    password: password,
+                    rememberMe: rememberMe
                 },
                 success: function (response) {
                     if (response.success) {

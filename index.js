@@ -12,7 +12,7 @@ const request = require('request');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const MONGODB_URI = 'mongodb+srv://vercel-admin-user:SpToSHOYyg6s9dgz@myfirstcluster.wnavi.mongodb.net/mydatabase?retryWrites=true&w=majority';
 process.env.MONGODB_URI = MONGODB_URI;
-const twelvedata = require("twelvedata");
+const cookieParser = require('cookie-parser');
 
 const store = new MongoDBStore({
     uri: process.env.MONGODB_URI,
@@ -24,10 +24,14 @@ store.on('error', (error) => {
 });
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: true,
+    secret: process.env.SESSION_SECRET || 'secret-key',
+    resave: false,
     saveUninitialized: true,
     store: store,
+    cookie: {
+        secure: false, // False because we don't use HTTPS
+        maxAge: 86400000, // Cookie expiration time (e.g., 1 day)
+    },
 }));
 
 app.set('view engine', 'ejs');
@@ -41,6 +45,7 @@ app.use(express.static(__dirname + '/particles.js-master'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -51,8 +56,6 @@ var transporter = nodemailer.createTransport({
         pass: 'skzmiycrrvybffqw'
     }
 });
-
-
 
 let keyForStock = "9c512d2eb06b44cd8e670a44ce3107d4";
 
@@ -104,6 +107,12 @@ app.post('/login', async  (req, res) => {
                     .then((result) => {
                         if (result) {
                             req.session.loggedIn = true;
+                            if (req.body.rememberMe === 'on') {
+                                res.cookie('rememberMe', 'true', {
+                                    maxAge: 30 * 24 * 60 * 60 * 1000, // Set cookie expiration time 30 days
+                                    httpOnly: true, // Make the cookie accessible only by the server
+                                });
+                            }
                             res.json({ success: true });
                         } else {
                             res.json({ success: false, message: 'Invalid username or password' });
